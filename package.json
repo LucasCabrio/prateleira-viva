@@ -1,0 +1,12 @@
+{
+  "name": "prateleira-viva",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "backend": "node --env-file-if-exists=server/.env server/src/index.js",
+    "seed": "node server/src/seed.js",
+    "test": "node --test server/test/*.test.js",
+    "mobile": "npm --prefix mobile start",
+    "web": "npm --prefix mobile run web"
+  }
+}
