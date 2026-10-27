@@ -28,8 +28,8 @@ export function DashboardScreen({
         >
           VISÃO DO MERCADO
         </Text>
-        <Text style={[s.title, { marginTop: 8 }]}>Cada produto conta.</Text>
-        <Text style={s.subtitle}>Veja o que precisa da sua atenção hoje.</Text>
+        <Text style={[s.title, { marginTop: 8 }]}>Resumo dos lotes</Text>
+        <Text style={s.subtitle}>Estoque cadastrado e prazos de validade.</Text>
       </View>
       <View
         style={{
@@ -53,20 +53,19 @@ export function DashboardScreen({
           {money(summary.atRisk)}
         </Text>
         <Text style={{ color: "#D8E6DA", fontSize: 14, lineHeight: 21 }}>
-          Valor de venda dos produtos que vencem em até 7 dias. Priorize sua
-          saída.
+          Soma do preço dos produtos que vencem em até 7 dias.
         </Text>
         <View
           style={{ backgroundColor: "#3A7C60", padding: 12, borderRadius: 12 }}
         >
           <Text style={{ color: "#fff", fontWeight: "600" }}>
-            {summary.urgent} lote(s) para agir hoje →
+            {summary.urgent} lote(s) vencem em até 2 dias
           </Text>
         </View>
       </View>
       <View style={{ flexDirection: "row", gap: 12 }}>
         {[
-          [summary.lots, "Lotes ativos"],
+          [summary.lots, "Lotes"],
           [summary.units, "Unidades"],
           [summary.expired, "Vencidos"],
         ].map(([value, label]) => (
@@ -91,7 +90,7 @@ export function DashboardScreen({
       <View style={{ gap: 5 }}>
         <Text style={s.section}>Primeiro a vencer</Text>
         <Text style={s.subtitle}>
-          Uma fila simples para evitar esquecimentos.
+          Lotes ordenados pela data de validade.
         </Text>
       </View>
       {batches.length === 0 ? (

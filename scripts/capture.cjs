@@ -21,7 +21,7 @@ const assert = require("node:assert/strict");
     .fill("demo@prateleiraviva.com");
   await page.getByLabel("Senha", { exact: true }).fill("Demo@12345");
   await page.getByRole("button", { name: "Entrar no mercado" }).click();
-  await page.getByText("Cada produto conta.").waitFor();
+  await page.getByText("Resumo dos lotes").waitFor();
   await page.screenshot({ path: "docs/screenshots/02-dashboard.png" });
   await page.getByRole("button", { name: "▤  Prateleira" }).click();
   await page.getByText("Sua prateleira", { exact: true }).waitFor();

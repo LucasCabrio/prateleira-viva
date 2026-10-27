@@ -1,39 +1,36 @@
-# Roteiro de apresentação - 8 a 10 minutos
+# Apresentação do Prateleira Viva
+
 Lucas Cabrio - 04723-133
+
 Paulo Esteves - 04723-090
 
-## 1. Problema e propósito (Lucas, 1 min)
-"Escolhemos um pequeno mercado fictício. O problema é esquecer produtos próximos do vencimento. A solução organiza lotes por validade e mostra onde agir primeiro. Esperamos reduzir desperdícios, mas não medimos resultados em uma empresa real."
+## Sequência da demonstração
 
-## 2. Demonstração (Lucas, 3 min)
-1. Iniciar o backend e Expo; entrar com a conta demo.
-2. Explicar valor em risco, unidades e vencidos. Valor em risco não significa lucro perdido.
-3. Abrir Prateleira, buscar Iogurte e mostrar a sugestão de desconto.
-4. Cadastrar lote, digitar 3017620422003 e buscar no Open Food Facts.
-5. Confirmar o nome retornado e preencher quantidade, preço e validade.
-6. Salvar e localizar o lote na consulta.
+1. Apresentar o problema: acompanhar as validades dos lotes de um pequeno mercado.
+2. Entrar com a conta demo e mostrar o resumo. Explicar como o valor em risco é calculado.
+3. Abrir a lista de lotes e filtrar os que vencem em até sete dias.
+4. Cadastrar um lote. O código 3017620422003 pode ser usado para mostrar a consulta ao Open Food Facts.
+5. Alterar a quantidade, salvar e conferir a mudança na lista.
+6. Reiniciar o backend e consultar o registro novamente para demonstrar a persistência.
+7. Excluir o lote com confirmação e sair da conta.
 
-## 3. CRUD, regras e persistência (Paulo, 2 min)
-1. Editar a quantidade do lote e salvar.
-2. Recarregar o app para mostrar que o cadastro permanece.
-3. Reiniciar o backend e consultar novamente: o arquivo SQLite mantém os dados.
-4. Excluir com confirmação.
-5. Mostrar campo inválido e mensagem de erro.
-6. Sair e explicar que as rotas exigem autenticação.
+## Código para mostrar
 
-## 4. Arquitetura (Paulo, 2 min)
-"A interface usa React Native e Expo. Rotas ficam em app, telas em screens e componentes reutilizáveis em components. O serviço api.ts centraliza as requisições. O backend é um BFF porque atende ao app e prepara indicadores e sugestões. Só ele acessa o SQLite e o Open Food Facts."
-Mostrar rules.js, auth.js e database.js.
+- `mobile/src/components/BatchCard.tsx`: o mesmo cartão é usado no resumo e na consulta.
+- `mobile/src/screens/BatchFormScreen.tsx`: o formulário atende tanto ao cadastro quanto à edição.
+- `mobile/src/services/api.ts`: requisições do app para o backend.
+- `server/src/rules.js`: cálculo dos dias restantes, desconto e indicadores.
+- `server/src/database.js`: tabelas do SQLite.
+- `server/src/auth.js`: senha e sessão do usuário.
 
-## Perguntas prováveis
-- **Por que SQLite?** Banco relacional persistente, simples de executar e suficiente para um protótipo local.
-- **Por que BFF?** Centraliza validação, autenticação, acesso externo e dados prontos para a interface.
-- **Onde fica a senha?** No backend como hash scrypt com salt; nunca em texto puro no banco.
-- **Como protege os dados?** Token de sessão e filtro user_id em cada operação.
-- **E se a API externa cair?** Timeout e mensagem; cadastro manual permanece disponível.
-- **Qual a regra de desconto?** 30% até 2 dias, 15% entre 3 e 7, zero depois; vencidos não recebem sugestão.
-- **Por que produto e lote?** O mesmo produto pode ter diferentes validades; cada cadastro é um lote.
-- **O que falta para empresa real?** Acesso compartilhado por loja, HTTPS, backup, revisão de dependências e teste em celulares reais.
+## Assuntos para revisar antes
 
-## Antes da aula
-Executar seed apenas para preparar a conta. Conferir datas, Wi-Fi e IP da API. Testar o aparelho antes da apresentação. Ter a versão web e o PDF como apoio. Se a API externa estiver fora do ar, explicar o fallback e usar cadastro manual, sem afirmar que uma resposta simulada veio da internet.
+Saber explicar a diferença entre produto e lote; por que o app passa pelo BFF antes de chegar ao banco; onde os dados ficam salvos; como o token identifica o usuário; e o que acontece quando a consulta externa falha.
+
+Os percentuais de 15% e 30% são regras escolhidas para a demonstração. Não vieram de uma pesquisa com mercados e não alteram o preço de venda automaticamente.
+
+## Preparação
+
+Conferir o IP da API, a conexão do celular e as datas dos lotes. O seed mantém os dados existentes, então os produtos envelhecem conforme os dias passam. Se o catálogo externo não responder, o formulário permite digitar o nome manualmente.
+
+Combinar entre os integrantes quem apresenta cada parte e ensaiar a sequência no aparelho que será usado na aula.

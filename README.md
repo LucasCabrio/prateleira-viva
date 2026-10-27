@@ -1,11 +1,13 @@
 # Prateleira Viva
-Aplicação acadêmica em **React Native + Expo**, com BFF Node.js e SQLite, para reduzir esquecimentos de produtos próximos do vencimento em pequenos mercados.
+Trabalho de Dispositivos Móveis. O aplicativo foi feito em React Native com Expo e permite cadastrar lotes de produtos, consultar suas validades e identificar quais estão perto de vencer. O backend usa Node.js e SQLite.
 
 **Lucas Cabrio - 04723-133**
 **Paulo Esteves - 04723-090**
 
-## Por que fazer?
-O Mercado do Bairro é a empresa fictícia usada no projeto. Conferir a validade em papel dificulta saber o que deve sair primeiro. O aplicativo reúne os lotes, ordena por validade e sugere descontos enquanto os produtos ainda estão válidos. O público é o dono ou funcionário responsável pela prateleira. Benefícios esperados: menos perdas, cadastro mais rápido e decisões mais claras. Não foi realizado estudo de impacto em empresa real.
+## Ideia do projeto
+O cenário escolhido foi um pequeno mercado, chamado Mercado do Bairro no cadastro de demonstração. Ele é fictício. O problema tratado é o acompanhamento de validade: dois lotes do mesmo produto podem vencer em dias diferentes e precisam ser conferidos separadamente.
+
+O funcionário cadastra os lotes e consulta uma lista ordenada por vencimento. O app também sugere descontos para os que estão próximos da validade. A intenção é ajudar a vender esses produtos antes do vencimento e evitar descarte. O projeto ainda não foi usado em um mercado real.
 
 ## Executar
 Requer **Node.js 24 LTS** (o backend utiliza `node:sqlite`) e npm.
@@ -72,7 +74,7 @@ O app nunca acessa o banco diretamente. O BFF transforma os dados em indicadores
 - `server/src/seed.js`: demonstração reproduzível.
 - `server/test`: testes de regras, API e persistência.
 - `docs/screenshots`: capturas reais do app Expo web em viewport de celular.
-- `docs/roteiro-apresentacao.md`: roteiro de fala e demonstração.
+- `docs/roteiro-apresentacao.md`: sequência de demonstração e assuntos para revisar.
 - `output/pdf`: relatório final com os integrantes.
 
 ### Banco

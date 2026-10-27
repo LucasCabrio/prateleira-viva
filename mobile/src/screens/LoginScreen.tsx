@@ -67,12 +67,11 @@ export function LoginScreen() {
         >
           PRATELEIRA VIVA
         </Text>
-        <Text style={[s.title, { fontSize: 40, lineHeight: 44 }]}>
-          Menos perdas.{"\n"}Mais futuro.
+        <Text style={[s.title, { fontSize: 32, lineHeight: 38 }]}>
+          Controle de validade
         </Text>
         <Text style={s.subtitle}>
-          Transforme a validade dos produtos em uma decisão melhor para o seu
-          mercado.
+          Consulte os lotes do mercado e acompanhe os próximos vencimentos.
         </Text>
       </View>
       <View style={[s.card, { gap: 17 }]}>
@@ -128,7 +127,7 @@ export function LoginScreen() {
         </Pressable>
       </View>
       <Text style={{ textAlign: "center", fontSize: 12, color: colors.muted }}>
-        Gestão simples. Impacto real.
+        Prateleira Viva · Controle de lotes
       </Text>
     </ScrollView>
   );

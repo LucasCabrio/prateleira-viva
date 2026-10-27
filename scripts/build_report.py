@@ -1,134 +1,249 @@
-from reportlab.pdfgen import canvas
-from reportlab.lib.colors import HexColor
-from reportlab.lib.utils import ImageReader
-from reportlab.platypus import Paragraph
-from reportlab.lib.styles import ParagraphStyle
+"""Gera o relatório do trabalho a partir dos prints em docs/screenshots."""
 from pathlib import Path
-from xml.sax.saxutils import escape
+from reportlab.lib import colors
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, PageBreak, Image, Table, TableStyle
+)
 
-ROOT=Path(__file__).resolve().parents[1]
-OUT=ROOT/'output/pdf'
-OUT.mkdir(parents=True,exist_ok=True)
-path=OUT/'Prateleira_Viva_Lucas_Cabrio_Paulo_Esteves.pdf'
-c=canvas.Canvas(str(path),pagesize=(595.28,841.89))
-c.setTitle('Prateleira Viva - Lucas Cabrio e Paulo Esteves')
-c.setAuthor('Lucas Cabrio - 04723-133; Paulo Esteves - 04723-090')
-green='#26694E'; ink='#173F35'; muted='#66766B'; cream='#F5F3EB'; lime='#DFEDB1'
-style=ParagraphStyle('body',fontName='Helvetica',fontSize=11,leading=17,textColor=HexColor(ink))
-page=0
-def text(s,x,y,size=11,color=ink,bold=False):
- c.setFillColor(HexColor(color));c.setFont('Helvetica-Bold' if bold else 'Helvetica',size);c.drawString(x,y,s)
-def para(s,x,y,w=499,size=11):
- st=ParagraphStyle('p',parent=style,fontSize=size,leading=size*1.5)
- p=Paragraph(s,st);_,h=p.wrap(w,700);p.drawOn(c,x,y-h);return y-h-14
-def start(kicker,title):
- global page
- page+=1;c.setFillColor(HexColor(cream));c.rect(0,0,596,842,fill=1,stroke=0)
- text('PRATELEIRA VIVA',48,793,10,green,True);text(kicker.upper(),48,744,10,muted,True)
- text(title,48,710,28,ink,True)
- c.setStrokeColor(HexColor('#D9DED3'));c.line(48,49,547,49)
- text('Lucas Cabrio | Paulo Esteves',48,31,9,muted);text(f'{page:02}',525,31,9,muted)
-def end():c.showPage()
-def heading(s,y):text(s,48,y,15,green,True);return y-18
-def shot(filename,x,y,w=221):
- img=ImageReader(str(ROOT/'docs/screenshots'/filename));iw,ih=img.getSize();h=w*ih/iw
- c.drawImage(img,x,y-h,w,h,mask='auto');return y-h
-start('Projeto de dispositivos móveis','Menos perdas. Mais futuro.')
-para('Uma aplicação mobile para dar visibilidade aos produtos próximos do vencimento em pequenos mercados.',48,670,450,16)
-c.setFillColor(HexColor(green));c.roundRect(48,340,499,205,24,fill=1,stroke=0)
-text('pv',72,465,54,lime,True);text('Validade vira prioridade.',72,418,23,'#FFFFFF',True)
-text('React Native + Expo  |  BFF Node.js  |  SQLite',72,380,12,'#FFFFFF')
-text('INTEGRANTES',48,287,10,muted,True)
-text('Lucas Cabrio - 04723-133',48,257,16,ink,True)
-text('Paulo Esteves - 04723-090',48,229,16,ink,True)
-para('Projeto acadêmico • 27 de outubro de 2026<br/>Empresa de referência fictícia: Mercado do Bairro.<br/>Código modularizado, persistência real e integração externa.',48,179)
-end()
-start('01 / Propósito','O problema de negócio')
-y=para('Pequenos mercados precisam conferir a validade de vários produtos. Anotações dispersas dificultam identificar quais lotes exigem ação imediata. Isso pode gerar descarte e perda de oportunidades de venda.',48,665)
-y=heading('Público e proposta',y-12)
-y=para('Dono ou funcionário responsável pela prateleira. O app reúne os lotes em uma lista por validade, exibe indicadores e recomenda descontos para os produtos ainda válidos.',48,y)
-y=heading('O diferencial, sem complicar',y-10)
-y=para('Uma fila de prioridade com três decisões claras: acompanhar, considerar desconto ou retirar da venda. A consulta por código de barras evita redigitar o nome quando o produto existe no catálogo externo.',48,y)
-y=heading('Regras implementadas no BFF',y-10)
-for line in ['Vencido: sinalizar retirada; nenhum desconto sugerido.','De hoje até 2 dias: sugestão de 30% de desconto.','De 3 a 7 dias: sugestão de 15% de desconto.','Acima de 7 dias: acompanhar, sem desconto.']:
- y=para('• '+line,48,y)
-y=heading('Benefícios esperados',y-6)
-y=para('Menos esquecimentos, cadastro mais rápido e decisões mais consistentes. Não houve piloto em empresa real; economia ou redução de perdas ainda não foram mensuradas.',48,y)
-para('<b>Valor em risco:</b> quantidade × preço dos lotes com validade entre hoje e 7 dias. É valor potencial de venda, não prejuízo realizado. Produtos vencidos são contabilizados separadamente.',48,y)
-end()
-start('02 / Arquitetura','Três camadas, um fluxo')
-boxes=[(48,562,499,94,'APP • React Native + Expo','Telas, componentes, rotas e estado de sessão'),(48,404,499,94,'BFF • Node.js','Autenticação, validação, indicadores e descontos'),(48,248,238,94,'SQLite','Usuários, sessões e lotes'),(309,248,238,94,'Open Food Facts','Consulta de nome por código')]
-for x,y,w,h,title,desc in boxes:
- c.setFillColor(HexColor('#FFFFFF'));c.roundRect(x,y,w,h,15,fill=1,stroke=0);text(title,x+17,y+61,13,green,True);para(desc,x+17,y+43,w-34,10)
-text('HTTP JSON + token de sessão',190,530,11,muted)
-c.setStrokeColor(HexColor(green));c.line(297,521,297,503);c.line(297,503,293,509);c.line(297,503,301,509)
-text('SQL parametrizado',83,370,11,muted);text('HTTPS + timeout',353,370,11,muted)
-para('O aplicativo não abre o banco. Toda leitura e gravação passa pelo BFF. O backend também consulta a API externa e devolve somente os campos necessários à interface.',48,214)
-para('<b>Por que BFF?</b> Ele não apenas repassa registros: calcula validade, status, desconto e indicadores para este app. SQLite mantém o projeto simples e persiste em server/data.db, mesmo após reiniciar o servidor.',48,140)
-end()
-start('03 / Organização e dados','Código fácil de explicar')
-y=665
-for title,body in [
- ('Rotas e telas','mobile/src/app contém as rotas Expo Router e a proteção de acesso. screens contém LoginScreen, DashboardScreen, InventoryScreen e BatchFormScreen.'),
- ('Componentes reutilizáveis','components reúne Button, Field, Message, Page e BatchCard. theme.ts centraliza cores e formatação. Cada componente tem uma responsabilidade visível.'),
- ('Estado e integração','AuthContext gerencia sessão. InventoryContext guarda lotes e indicadores. services/api.ts centraliza fetch, token, timeout e tratamento de erros.'),
- ('Backend separado por responsabilidade','app.js define rotas HTTP; auth.js cuida de senhas e sessões; rules.js valida e calcula; database.js cria o schema; seed.js prepara dados fictícios.')]:
- y=heading(title,y);y=para(body,48,y);y-=4
-y=heading('Modelo relacional',y)
-y=para('<b>users:</b> id, name, email único, password (hash).<br/><b>sessions:</b> token (hash), user_id, expires.<br/><b>batches:</b> id, user_id, name, barcode, quantity, price, expires, category, created_at.',48,y)
-para('Relacionamentos: um usuário possui várias sessões e vários lotes. Cada lote pertence a um usuário. O mesmo produto pode aparecer em lotes distintos, com validades diferentes.',48,y)
-end()
-start('04 / Autenticação e dashboard','Da entrada à decisão')
-shot('01-login.png',48,660)
-shot('02-dashboard.png',326,660)
-para('<b>1. Acesso:</b> cadastro de conta, validação de campos e login. Senhas usam scrypt com salt; sessão opaca expira em 24 horas.',48,162,221,10)
-para('<b>2. Visão geral:</b> valor em risco, unidades, lotes e vencidos. Dados demonstrativos são fictícios e calculados pelo BFF.',326,162,221,10)
-text('Capturas reais: Expo web, viewport 430 × 932. Não são prints de aparelho nativo.',48,70,9,muted)
-end()
-start('05 / Consulta e edição','A prateleira em ordem')
-shot('03-prateleira.png',48,660)
-shot('04-edicao.png',326,660)
-para('<b>3. Consulta:</b> busca por nome, filtro por prazo e ordenação por validade. Cada cartão abre os detalhes do lote.',48,162,221,10)
-para('<b>4. Edição:</b> o formulário reaproveitado mostra o status e a sugestão de preço. Mudanças são validadas e persistidas.',326,162,221,10)
-text('Capturas reais da mesma aplicação React Native executada no navegador via Expo.',48,70,9,muted)
-end()
-start('06 / Cadastro e exclusão','Fluxo completo de dados')
-shot('05-cadastro.png',48,660)
-shot('06-exclusao.png',326,660)
-para('<b>5. Cadastro:</b> nome, quantidade, preço, validade e categoria. Código de barras é opcional; consulta via BFF ao Open Food Facts.',48,162,221,10)
-para('<b>6. Exclusão:</b> confirmação explícita antes de apagar. A interface informa o resultado e atualiza a consulta.',326,162,221,10)
-text('O registro temporário usado no teste foi excluído; a conta demo foi preservada.',48,70,9,muted)
-end()
-start('07 / API e segurança','Integrações com propósito')
-y=heading('Rotas principais',665)
-y=para('<b>POST /auth/register e /auth/login:</b> criar conta e autenticar.<br/><b>GET /auth/me; POST /auth/logout:</b> restaurar e revogar sessão.<br/><b>GET /dashboard:</b> indicadores calculados.<br/><b>GET e POST /batches:</b> consulta e cadastro.<br/><b>PUT e DELETE /batches/:id:</b> edição e exclusão.<br/><b>GET /products/lookup?barcode=...:</b> busca externa autenticada.',48,y)
-y=heading('Open Food Facts',y-6)
-y=para('O BFF faz uma requisição HTTPS para /api/v2/product/{codigo}.json e solicita product_name e brands. O usuário revisa o nome recebido e informa os dados do lote. Teste real: código 3017620422003 retornou Nutella. Não é usado scanner de câmera.',48,y)
-y=para('Se não houver produto, retorna 404; em falha ou timeout, 502. A mensagem orienta o preenchimento manual. Os dados são colaborativos e a origem é identificada na tela. Documentação: openfoodfacts.github.io/openfoodfacts-server/api/',48,y)
-y=heading('Controle de acesso e validação',y-6)
-y=para('Todas as rotas de negócio exigem Bearer token. O banco guarda o hash do token; o cliente nativo usa SecureStore e a versão web usa sessionStorage. Consultas verificam user_id para impedir acesso aos lotes de outra conta. Logout revoga a sessão.',48,y)
-para('Validação no cliente melhora a experiência; validação no servidor protege os dados. O backend rejeita quantidade inválida, preço não positivo, data inexistente e categoria desconhecida. SQL parametrizado evita construir consultas com valores digitados.',48,y)
-end()
-start('08 / Execução e validação','Preparado para demonstrar')
-y=heading('Como executar',665)
-y=para('Requisito: Node.js 24 LTS.<br/>1. Na raiz: <b>npm --prefix mobile ci</b><br/>2. Preparar demonstração: <b>npm run seed</b><br/>3. Primeiro terminal: <b>npm run backend</b><br/>4. Segundo terminal: <b>npm run web</b><br/>Conta: demo@prateleiraviva.com / Demo@12345',48,y)
-y=para('Para celular, configure EXPO_PUBLIC_API_URL com o IP do computador e mantenha ambos na mesma rede. Use Expo Go compatível com SDK 58 ou development build. Instruções completas e perfil EAS estão no README.',48,y)
-y=heading('O que foi verificado',y-4)
-y=para('Testes HTTP: login, validação, CRUD, isolamento entre contas, expiração, logout, API externa simulada em sucesso/falha e persistência após reabrir o banco. Teste de interface: login até exclusão e bloqueio de rota após logout. Consulta externa real também realizada.',48,y)
-y=para('TypeScript e lint direto aprovados. Expo Doctor: 20/20 verificações. Bundles Android, iOS e web gerados. As telas foram testadas no navegador em dimensões de celular; não houve execução em dispositivo nativo nem geração de APK/IPA.',48,y)
-y=heading('Limites e próximos passos',y-4)
-para('Escopo acadêmico local: sem vendas, notificações, modo offline ou equipe compartilhada. npm audit aponta 3 alertas high na cadeia Expo CLI/Zod; a correção automática sugerida reduz a versão do Expo e não foi aplicada. Antes de produção: revisar dependências, adotar HTTPS, restringir CORS, configurar backup e testar aparelhos.',48,y)
-end()
-start('09 / Apresentação','O que cada integrante explica')
-y=heading('Lucas Cabrio - 04723-133',665)
-y=para('Apresentar o problema do mercado, o público e os benefícios esperados. Demonstrar login, indicadores, consulta e cadastro com busca por código de barras. Explicar os componentes reutilizados no frontend.',48,y)
-y=heading('Paulo Esteves - 04723-090',y-10)
-y=para('Demonstrar edição, persistência ao reiniciar o backend e exclusão. Explicar BFF, banco, autenticação e regras de validade. Mostrar rules.js e database.js como exemplos centrais.',48,y)
-y=heading('Perguntas para ensaiar',y-10)
-y=para('<b>Por que SQLite?</b> Persistência relacional simples para um protótipo local.<br/><b>Por que BFF?</b> Prepara dados, aplica regras e protege o acesso ao banco.<br/><b>Se a API cair?</b> Mensagem clara e cadastro manual.<br/><b>O desconto é automático?</b> Não, é uma sugestão para decisão do responsável.<br/><b>Como comprovar persistência?</b> Reiniciar o BFF e consultar o mesmo lote.',48,y)
-y=heading('Referências e entregáveis',y-10)
-y=para('Código-fonte: github.com/LucasCabrio/prateleira-viva (privado).<br/>Guia detalhado: README.md.<br/>Roteiro: docs/roteiro-apresentacao.md.<br/>Prints: docs/screenshots/.',48,y)
-para('Expo SDK 58: docs.expo.dev/versions/v58.0.0/<br/>Expo Router: docs.expo.dev/router/installation/<br/>SecureStore: docs.expo.dev/versions/v58.0.0/sdk/securestore/<br/>Open Food Facts: openfoodfacts.github.io/openfoodfacts-server/api/<br/>Node.js SQLite: nodejs.org/api/sqlite.html',48,y,499,10)
-end()
-c.save()
-print(path)
+ROOT = Path(__file__).resolve().parents[1]
+DEST = ROOT / "output/pdf/Prateleira_Viva_Lucas_Cabrio_Paulo_Esteves.pdf"
+DEST.parent.mkdir(parents=True, exist_ok=True)
+
+body = ParagraphStyle("body", fontName="Helvetica", fontSize=11, leading=17,
+                      spaceAfter=12, alignment=TA_JUSTIFY)
+title = ParagraphStyle("title", parent=body, fontName="Helvetica-Bold",
+                       fontSize=17, leading=22, spaceAfter=20, alignment=0)
+sub = ParagraphStyle("sub", parent=body, fontName="Helvetica-Bold",
+                     fontSize=12, leading=18, spaceBefore=8, alignment=0)
+caption = ParagraphStyle("caption", parent=body, fontSize=9, leading=13,
+                         alignment=0, spaceAfter=10)
+center = ParagraphStyle("center", parent=body, alignment=TA_CENTER, leading=20)
+story = []
+
+def p(text, style=body):
+    story.append(Paragraph(text, style))
+
+def section(text):
+    p(text, title)
+
+def newpage():
+    story.append(PageBreak())
+
+def screenshots(a, b, ca, cb):
+    def image(name):
+        return Image(str(ROOT / "docs/screenshots" / name), width=210, height=455.16)
+    table = Table([[image(a), image(b)],
+                   [Paragraph(ca, caption), Paragraph(cb, caption)]],
+                  colWidths=[240, 240])
+    table.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+        ("TOPPADDING", (0, 1), (-1, 1), 12),
+        ("LEFTPADDING", (0, 0), (-1, -1), 8),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+    ]))
+    story.append(table)
+
+def footer(canvas, doc):
+    if doc.page > 1:
+        canvas.setFont("Helvetica", 9)
+        canvas.setFillColor(colors.HexColor("#666666"))
+        canvas.drawString(57, 31, "Prateleira Viva - Dispositivos Móveis")
+        canvas.drawRightString(538, 31, str(doc.page))
+
+story.append(Spacer(1, 45))
+p("TRABALHO DE DISPOSITIVOS MÓVEIS", center)
+story.append(Spacer(1, 100))
+p("<b>PRATELEIRA VIVA</b>", ParagraphStyle(
+    "cover", parent=center, fontSize=22, leading=30))
+p("Aplicativo para controle de validade de produtos", center)
+story.append(Spacer(1, 85))
+p("Lucas Cabrio - 04723-133<br/>Paulo Esteves - 04723-090", center)
+story.append(Spacer(1, 80))
+p("Relatório do projeto desenvolvido em React Native com Expo,<br/>"
+  "backend Node.js e banco de dados SQLite.", center)
+story.append(Spacer(1, 65))
+p("Outubro de 2026", center)
+newpage()
+
+section("1. Problema e proposta")
+p("O projeto trata do controle de validade em um pequeno mercado. Nesse tipo de "
+  "negócio, o mesmo produto pode chegar em entregas diferentes e ter datas de "
+  "vencimento distintas. Conferir apenas o nome do produto não é suficiente: "
+  "é necessário acompanhar cada lote.")
+p("Foi usado como exemplo o Mercado do Bairro, uma empresa fictícia. O aplicativo "
+  "é voltado ao responsável pelo estoque, que cadastra os lotes e consulta quais "
+  "precisam ser vendidos primeiro. A intenção é diminuir os esquecimentos e o "
+  "descarte de produtos. Ainda não houve uso em uma empresa real.")
+p("1.1 Funcionamento", sub)
+p("Após entrar na conta, o usuário vê um resumo dos lotes, a quantidade de unidades "
+  "e os produtos próximos do vencimento. Na consulta, pode buscar pelo nome ou "
+  "filtrar os lotes que vencem em até sete dias. O cadastro pede nome, quantidade, "
+  "preço unitário, validade e categoria.")
+p("Cada registro representa um lote. Por exemplo, duas caixas de leite com validades "
+  "diferentes devem ser cadastradas separadamente. Os dados podem ser editados e a "
+  "exclusão pede confirmação.")
+p("1.2 Regras escolhidas", sub)
+rows = [["Prazo de validade", "Orientação no aplicativo"],
+        ["Já venceu", "Retirar da venda; sem desconto"],
+        ["Hoje ou nos próximos 2 dias", "Sugerir 30% de desconto"],
+        ["Entre 3 e 7 dias", "Sugerir 15% de desconto"],
+        ["Mais de 7 dias", "Acompanhar, sem desconto"]]
+table = Table(rows, colWidths=[210, 270], hAlign="LEFT")
+table.setStyle(TableStyle([
+    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+    ("FONTSIZE", (0, 0), (-1, -1), 10),
+    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eeeeee")),
+    ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#bbbbbb")),
+    ("TOPPADDING", (0, 0), (-1, -1), 9),
+    ("BOTTOMPADDING", (0, 0), (-1, -1), 9),
+]))
+story.extend([table, Spacer(1, 16)])
+p("Os percentuais foram definidos para a demonstração do projeto. São sugestões "
+  "e não alteram automaticamente o preço em um sistema de vendas.")
+p("O indicador <b>valor em risco</b> soma quantidade × preço dos lotes que vencem "
+  "entre hoje e sete dias. Um lote com 10 unidades de R$ 5,00 contribui com R$ 50,00 "
+  "para o indicador. Esse valor não representa prejuízo já ocorrido.")
+newpage()
+
+section("2. Arquitetura e organização do código")
+p("O projeto tem um aplicativo e um backend separados. O aplicativo usa React "
+  "Native com Expo e se comunica com o backend por requisições HTTP em JSON. "
+  "O backend funciona como BFF: atende às telas e calcula as informações que "
+  "elas precisam. Apenas ele acessa o banco e a API externa.")
+p("<b>Aplicativo Expo → BFF Node.js → SQLite</b><br/>"
+  "O BFF também consulta o Open Food Facts pela internet.", sub)
+p("O SQLite foi escolhido porque salva os dados em um arquivo e não exige instalar "
+  "um servidor de banco separado. O arquivo fica em <b>server/data.db</b>. "
+  "Reiniciar o backend não apaga os cadastros.")
+p("2.1 Separação dos arquivos", sub)
+p("<b>mobile/src/app:</b> rotas e verificação de acesso.<br/>"
+  "<b>mobile/src/screens:</b> telas de login, resumo, consulta e formulário.<br/>"
+  "<b>mobile/src/components:</b> campos, botões, mensagens e cartões de lote.<br/>"
+  "<b>mobile/src/contexts:</b> sessão e dados usados pelas telas.<br/>"
+  "<b>mobile/src/services/api.ts:</b> requisições para o backend.")
+p("O cartão <b>BatchCard</b> aparece no resumo e na consulta. O "
+  "<b>BatchFormScreen</b> serve para cadastrar e editar. Assim, uma alteração "
+  "no formulário não precisa ser repetida em duas telas.")
+p("<b>server/src/app.js:</b> rotas da API.<br/>"
+  "<b>auth.js:</b> senhas e sessões.<br/>"
+  "<b>rules.js:</b> validação e regras de validade.<br/>"
+  "<b>database.js:</b> conexão e criação das tabelas.<br/>"
+  "<b>seed.js:</b> conta e lotes de demonstração.")
+p("2.2 Banco e autenticação", sub)
+p("A tabela <b>users</b> guarda nome, e-mail e senha protegida por hash. "
+  "<b>sessions</b> relaciona o token ao usuário e ao prazo de expiração. "
+  "<b>batches</b> guarda os lotes e o identificador do proprietário.")
+p("O login gera uma sessão válida por 24 horas. As rotas verificam o token e "
+  "filtram os registros pelo usuário. A senha usa scrypt com salt; o banco guarda "
+  "somente o hash do token de sessão. No celular, o token fica no SecureStore. "
+  "Na versão web, fica no sessionStorage.")
+newpage()
+
+section("3. Integração externa e validações")
+p("O Open Food Facts é usado para buscar o nome de um alimento pelo código de "
+  "barras. O código é digitado no formulário e enviado ao BFF, que consulta "
+  "<b>/api/v2/product/{codigo}.json</b>. Não foi implementada leitura pela câmera.")
+p("Quando encontra o produto, o app preenche o nome. Quantidade, preço e validade "
+  "continuam sendo informados pelo usuário, pois são dados específicos daquele "
+  "lote. Na verificação realizada, o código 3017620422003 retornou Nutella.")
+p("Se o catálogo não responder ou não tiver o produto, aparece uma mensagem e o "
+  "cadastro manual continua disponível. O nome retornado deve ser conferido, "
+  "pois o catálogo é colaborativo.")
+p("3.1 Rotas do BFF", sub)
+routes = [
+    ("POST /auth/register", "Cadastro de conta"),
+    ("POST /auth/login", "Login"),
+    ("GET /auth/me", "Consulta da sessão"),
+    ("POST /auth/logout", "Encerramento da sessão"),
+    ("GET /dashboard", "Indicadores"),
+    ("GET e POST /batches", "Consulta e cadastro de lotes"),
+    ("PUT e DELETE /batches/:id", "Edição e exclusão"),
+    ("GET /products/lookup", "Consulta ao Open Food Facts"),
+]
+table = Table([["Rota", "Uso"]] + routes, colWidths=[245, 235])
+table.setStyle(TableStyle([
+    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+    ("FONTSIZE", (0, 0), (-1, -1), 10),
+    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eeeeee")),
+    ("LINEBELOW", (0, 0), (-1, -1), 0.4, colors.HexColor("#bbbbbb")),
+    ("TOPPADDING", (0, 0), (-1, -1), 8),
+    ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+]))
+story.extend([table, Spacer(1, 16)])
+p("3.2 Tratamento de erros", sub)
+p("O formulário verifica campos obrigatórios, quantidade, preço e formato da "
+  "validade. O backend repete a validação e também rejeita datas inexistentes. "
+  "Por exemplo, 30/02/2026 não é aceito, mesmo tendo o formato esperado.")
+p("A edição e a exclusão conferem se o lote pertence ao usuário autenticado. "
+  "O acesso ao banco usa consultas com parâmetros. Mensagens de erro são "
+  "mostradas na tela quando a sessão expira, a rede falha ou os dados estão incorretos.")
+newpage()
+
+section("4. Telas do aplicativo")
+p("As figuras foram capturadas na versão web do aplicativo Expo, em uma janela "
+  "de 430 × 932 pixels. Os registros exibidos são dados de demonstração.", caption)
+screenshots("01-login.png", "02-dashboard.png",
+            "<b>Figura 1 - Login.</b> Entrada por e-mail e senha, com opção de criar conta.",
+            "<b>Figura 2 - Resumo.</b> Valor dos lotes próximos da validade, quantidade e lista por vencimento.")
+newpage()
+
+section("4. Telas do aplicativo (continuação)")
+screenshots("03-prateleira.png", "04-edicao.png",
+            "<b>Figura 3 - Consulta.</b> Busca por produto e filtros de validade.",
+            "<b>Figura 4 - Edição.</b> Dados do lote e sugestão de desconto calculada pelo backend.")
+p("O lote de iogurte mostrado na edição está perto do vencimento. Por isso, "
+  "recebe a sugestão de 30%. O produto vencido na consulta é sinalizado para "
+  "retirada da venda, sem sugestão de desconto.")
+newpage()
+
+section("4. Telas do aplicativo (continuação)")
+screenshots("05-cadastro.png", "06-exclusao.png",
+            "<b>Figura 5 - Cadastro.</b> Preenchimento dos dados de um novo lote.",
+            "<b>Figura 6 - Exclusão.</b> Confirmação antes de remover o registro.")
+p("O formulário de cadastro e edição é o mesmo componente. Na edição, os campos "
+  "começam preenchidos. Após salvar ou excluir, o app atualiza a lista e mostra "
+  "uma mensagem com o resultado.")
+newpage()
+
+section("5. Execução e testes")
+p("É necessário ter Node.js 24 LTS e npm. Na pasta do projeto, executar:")
+p("<font face='Courier' size='10'>npm --prefix mobile ci<br/>"
+  "npm run seed<br/>npm run backend</font>")
+p("Em outro terminal: <font face='Courier' size='10'>npm run web</font>. "
+  "A conta de demonstração é <b>demo@prateleiraviva.com</b>, com senha "
+  "<b>Demo@12345</b>. O seed não sobrescreve dados existentes.")
+p("No celular, EXPO_PUBLIC_API_URL deve apontar para o IP do computador, na "
+  "porta 3001. Os dois precisam estar na mesma rede. O README traz a configuração "
+  "para Expo Go compatível e para development build.")
+p("5.1 Verificações realizadas", sub)
+p("Os testes do backend cobrem cadastro, login, dados inválidos, CRUD, separação "
+  "dos registros por usuário, expiração e logout. Também verificam a leitura "
+  "dos dados depois de fechar e reabrir o banco. A consulta externa foi testada "
+  "com respostas controladas de sucesso e erro, além de uma chamada real.")
+p("O fluxo de interface foi executado no navegador: login, cadastro, consulta, "
+  "edição, exclusão e logout. TypeScript e ESLint passaram. O Expo Doctor "
+  "aprovou 20 verificações e foram gerados bundles Android, iOS e web. "
+  "Ainda falta testar em aparelhos físicos; não foi gerado APK ou IPA.")
+p("5.2 Limitações", sub)
+p("Cada usuário tem seus próprios lotes; não há compartilhamento por loja. "
+  "Também não há registro de vendas, notificações ou funcionamento offline. "
+  "A aplicação usa HTTP local para a apresentação. Um uso real exigiria "
+  "hospedagem com HTTPS, backup e ajustes de acesso.")
+p("A verificação de dependências apontou três alertas de segurança na cadeia "
+  "Expo CLI/Zod. A correção automática sugeria reduzir a versão do Expo e "
+  "não foi aplicada. O detalhe está registrado no README.")
+p("Referências", sub)
+p("Expo: https://docs.expo.dev/versions/v58.0.0/<br/>"
+  "Expo Router: https://docs.expo.dev/router/installation/<br/>"
+  "Open Food Facts: https://openfoodfacts.github.io/openfoodfacts-server/api/<br/>"
+  "SQLite no Node.js: https://nodejs.org/api/sqlite.html", caption)
+
+doc = SimpleDocTemplate(str(DEST), pagesize=(595.28, 841.89),
+                        rightMargin=57, leftMargin=57, topMargin=57, bottomMargin=57,
+                        title="Prateleira Viva - Relatório do projeto",
+                        author="Lucas Cabrio - 04723-133; Paulo Esteves - 04723-090")
+doc.build(story, onFirstPage=footer, onLaterPages=footer)
+print(DEST)
