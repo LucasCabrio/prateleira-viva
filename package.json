@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "check:lines": "node scripts/check-lines.cjs",
     "backend": "node --env-file-if-exists=server/.env server/src/index.js",
     "seed": "node server/src/seed.js",
     "test": "node --test server/test/*.test.js",

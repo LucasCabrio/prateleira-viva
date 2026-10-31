@@ -51,6 +51,10 @@ No emulador Android, o padrão é `http://10.0.2.2:3001`. No navegador e simulad
 - O desconto é apenas orientação; o sistema não registra vendas nem aplica promoção em caixa.
 
 ## Arquitetura
+Os arquivos de código têm no máximo 50 linhas. Para conferir, execute `npm run check:lines`. O limite conta também linhas em branco e comentários; não se aplica a documentação, imagens, PDF ou arquivos gerados como `package-lock.json`.
+
+As telas montam os componentes; os hooks em `mobile/src/hooks` cuidam dos formulários. No backend, `server/src/app.js` recebe as requisições e encaminha para `server/src/routes`. A validação dos lotes fica em `validation.js`, separada dos cálculos de `rules.js`.
+
 ```text
 App React Native / Expo Router
         | HTTP JSON + Bearer token
@@ -67,9 +71,9 @@ O app nunca acessa o banco diretamente. O BFF transforma os dados em indicadores
 - `mobile/src/components`: Button, Field, Message, Page e BatchCard reutilizáveis.
 - `mobile/src/contexts`: sessão e estado dos lotes.
 - `mobile/src/services/api.ts`: conexão HTTP, timeout e tratamento de sessão.
-- `server/src/app.js`: rotas HTTP do BFF.
+- `server/src/app.js` e `server/src/routes`: entrada HTTP e operações do BFF.
 - `server/src/auth.js`: hashes de senha e sessões.
-- `server/src/rules.js`: validação, validade, desconto e indicadores.
+- `server/src/rules.js` e `server/src/validation.js`: cálculos e validação.
 - `server/src/database.js`: schema e conexão SQLite.
 - `server/src/seed.js`: demonstração reproduzível.
 - `server/test`: testes de regras, API e persistência.
@@ -104,6 +108,7 @@ As rotas de negócio exigem `Authorization: Bearer TOKEN`. Erros retornam `{mess
 ## Verificação
 ```sh
 npm test
+npm run check:lines
 cd mobile
 npx tsc --noEmit
 npx eslint .

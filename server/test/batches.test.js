@@ -1,0 +1,24 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { setup, lot, account } from "./helpers.js";
+test("CRUD, isolamento e persistência após reiniciar o BFF", async t => {
+  const { request, register, restart } = await setup(t);
+  const token = await register();
+  const other = await register("paulo@test.com");
+  assert.equal((await request("/batches", "POST", { ...lot, quantity: -1 }, token)).status, 400);
+  const created = await request("/batches", "POST", lot, token);
+  assert.equal(created.status, 201);
+  const path = "/batches/" + created.data.id;
+  assert.equal((await request("/batches", "GET", undefined, other)).data.length, 0);
+  assert.equal((await request(path, "DELETE", undefined, other)).status, 404);
+  assert.equal((await request(path, "PUT", lot, other)).status, 404);
+  assert.equal((await request(path, "PUT", { ...lot, quantity: 8 }, token)).data.quantity, 8);
+  assert.equal((await request("/dashboard", "GET", undefined, token)).data.units, 8);
+  await restart();
+  const auth = await request("/auth/login", "POST", account);
+  const saved = await request("/batches", "GET", undefined, auth.data.token);
+  assert.equal(saved.data.length, 1);
+  assert.equal(saved.data[0].quantity, 8);
+  assert.equal((await request(path, "DELETE", undefined, auth.data.token)).status, 200);
+  assert.equal((await request("/batches", "GET", undefined, auth.data.token)).data.length, 0);
+});

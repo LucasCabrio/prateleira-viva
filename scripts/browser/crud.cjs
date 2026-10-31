@@ -1,0 +1,26 @@
+const assert = require("node:assert/strict");
+const { button, field } = require("./helpers.cjs");
+exports.exerciseCrud = async (page, screenshot) => {
+  await button(page, "+  Novo lote").click();
+  await field(page, "Nome do produto").fill("Produto teste de interface");
+  await field(page, "Quantidade").fill("3");
+  await field(page, "Preço unitário (R$)").fill("7,50");
+  await field(page, "Validade (DD/MM/AAAA)").fill("31/12/2026");
+  await screenshot(page, "05-cadastro.png");
+  await button(page, "Salvar lote").click();
+  await page.getByText("Lote cadastrado com sucesso.").waitFor();
+  await field(page, "Buscar produto").fill("Produto teste de interface");
+  await button(page, "Editar Produto teste de interface").click();
+  await field(page, "Quantidade").fill("5");
+  await button(page, "Salvar lote").click();
+  await page.getByText("Lote atualizado com sucesso.").waitFor();
+  await field(page, "Buscar produto").fill("Produto teste de interface");
+  await button(page, "Editar Produto teste de interface").click();
+  assert.equal(await field(page, "Quantidade").inputValue(), "5");
+  await button(page, "Excluir lote").click();
+  await page.getByText("Excluir este lote?").waitFor();
+  await button(page, "Sim, excluir definitivamente").scrollIntoViewIfNeeded();
+  await screenshot(page, "06-exclusao.png");
+  await button(page, "Sim, excluir definitivamente").click();
+  await page.getByText("Lote excluído com sucesso.").waitFor();
+};
