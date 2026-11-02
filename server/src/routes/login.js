@@ -1,3 +1,4 @@
+// Valida cadastro e login, limita tentativas por IP, verifica senhas e cria sessões para os usuários.
 import { hashPassword, verifyPassword, createSession } from "../auth.js";
 import { HttpError } from "../http.js";
 function checkAttempts(ip, attempts) {

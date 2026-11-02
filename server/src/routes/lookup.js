@@ -1,3 +1,4 @@
+// Consulta nome e marca pelo código de barras no Open Food Facts e trata código inválido, falhas e produto não encontrado.
 import { HttpError } from "../http.js";
 export async function lookup(code, fetchProduct) {
   if (!/^\d{8,14}$/.test(code || "")) {

@@ -1,3 +1,4 @@
+// Envia requisições ao backend com token de sessão e trata respostas, erros e tempo limite de espera.
 import { Platform } from "react-native";
 export const API_URL =
   process.env.EXPO_PUBLIC_API_URL ||

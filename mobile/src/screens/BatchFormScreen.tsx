@@ -1,3 +1,4 @@
+// Monta a tela de cadastro e edição de lotes e conecta os campos e botões às ações do formulário.
 import { Text, View } from "react-native";
 import { Batch } from "../types";
 import { useBatchForm } from "../hooks/useBatchForm";

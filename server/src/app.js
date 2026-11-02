@@ -1,3 +1,4 @@
+// Recebe requisições HTTP, verifica a autenticação, encaminha as rotas e devolve respostas ou erros.
 import { createServer } from "node:http";
 import { authenticate, tokenHash } from "./auth.js";
 import { readBody, reply, HttpError } from "./http.js";

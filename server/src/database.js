@@ -1,3 +1,4 @@
+// Abre o banco SQLite e cria, quando necessário, as tabelas de usuários, sessões e lotes com suas relações.
 import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";

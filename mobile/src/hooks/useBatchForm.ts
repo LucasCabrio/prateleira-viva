@@ -1,3 +1,4 @@
+// Gerencia os campos, o carregamento e os erros do formulário e executa consulta, cadastro, edição e exclusão de lotes.
 import { useState } from "react";
 import { Batch } from "../types";
 import { api } from "../services/api";

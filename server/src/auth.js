@@ -1,3 +1,4 @@
+// Calcula e verifica hashes de senhas, gera tokens de sessão e autentica usuários com sessões válidas por 24 horas.
 import {
   randomBytes,
   scryptSync,

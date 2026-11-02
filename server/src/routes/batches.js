@@ -1,3 +1,4 @@
+// Consulta, cadastra, atualiza e exclui lotes, validando os dados e restringindo o acesso ao usuário proprietário.
 import { enrich, dashboard, validateBatch } from "../rules.js";
 import { HttpError } from "../http.js";
 export function batches(db, userId, path, method, body) {
